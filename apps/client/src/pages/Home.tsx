@@ -12,7 +12,7 @@ import {
 } from "../components/ui/card";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Badge } from "../components/ui/badge";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
 
 interface FeedbackResult {
   id: number;
@@ -52,16 +52,18 @@ export default function Home() {
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Restaurant Feedback</h1>
+          <h1 className="text-3xl font-bold text-balance">Restaurant Feedback</h1>
           <Link to="/login">
-            <Button variant="outline">Admin Login</Button>
+            <Button variant="outline" className="transition-transform duration-150 ease-out active:scale-[0.96]">
+              Admin Login
+            </Button>
           </Link>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Share Your Experience</CardTitle>
-            <CardDescription>
+        <Card className="transition-shadow duration-150 ease-out hover:shadow-[0_0_0_1px_oklch(1_0_0/0.13)]">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-balance">Share Your Experience</CardTitle>
+            <CardDescription className="text-pretty">
               Tell us about your dining experience. Your feedback helps us
               improve.
             </CardDescription>
@@ -74,10 +76,11 @@ export default function Home() {
                 </Alert>
               )}
               {result && (
-                <Alert>
+                <Alert className="border-green-500/20 bg-green-500/5">
+                  <CheckCircle2 className="size-4 text-green-500" />
                   <AlertDescription>
                     <div className="space-y-2">
-                      <p className="font-medium">Feedback submitted successfully!</p>
+                      <p className="font-medium text-pretty">Feedback submitted successfully!</p>
                       <div className="flex flex-wrap gap-2">
                         <Badge
                           variant={
@@ -91,11 +94,14 @@ export default function Home() {
                           {result.sentiment}
                         </Badge>
                         {result.requires_action && (
-                          <Badge variant="destructive">Urgent Action Required</Badge>
+                          <Badge variant="destructive" className="gap-1">
+                            <AlertTriangle className="size-3" />
+                            Urgent Action Required
+                          </Badge>
                         )}
                       </div>
                       {result.key_items.length > 0 && (
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground text-pretty">
                           Key items: {result.key_items.join(", ")}
                         </p>
                       )}
@@ -112,7 +118,11 @@ export default function Home() {
                   required
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button
+                type="submit"
+                className="w-full transition-transform duration-150 ease-out active:scale-[0.96]"
+                disabled={loading}
+              >
                 {loading ? (
                   <>
                     <Loader2 className="animate-spin" />

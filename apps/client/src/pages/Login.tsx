@@ -50,10 +50,10 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
-          <CardDescription>
+      <Card className="w-full max-w-md transition-shadow duration-150 ease-out hover:shadow-[0_0_0_1px_oklch(1_0_0/0.13)]">
+        <CardHeader className="text-center space-y-1">
+          <CardTitle className="text-2xl font-bold text-balance">Admin Login</CardTitle>
+          <CardDescription className="text-pretty">
             Sign in to access the feedback dashboard
           </CardDescription>
         </CardHeader>
@@ -86,7 +86,11 @@ export default function Login() {
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full transition-transform duration-150 ease-out active:scale-[0.96]"
+              disabled={loading}
+            >
               {loading ? (
                 <>
                   <Loader2 className="animate-spin" />
@@ -99,7 +103,7 @@ export default function Login() {
             <Button
               type="button"
               variant="outline"
-              className="w-full"
+              className="w-full transition-transform duration-150 ease-out active:scale-[0.96]"
               onClick={fillDemo}
               disabled={loading}
             >
