@@ -4,12 +4,6 @@ import { useAuthStore } from "../stores/authStore";
 import { apiRequest } from "../lib/api";
 import { connectSocket, disconnectSocket } from "../lib/socket";
 import { Button } from "../components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Skeleton } from "../components/ui/skeleton";
 import {
@@ -20,15 +14,9 @@ import {
   TableHeader,
   TableRow,
 } from "../components/ui/table";
-import {
-  MessageSquare,
-  ThumbsUp,
-  ThumbsDown,
-  Minus,
-  AlertTriangle,
-  LogOut,
-} from "lucide-react";
+import { LogOut, AlertTriangle, Sun, Moon } from "lucide-react";
 import { NotoEmoji } from "../components/noto-emoji";
+import { useTheme } from "../components/theme-provider";
 
 interface Feedback {
   id: number;
@@ -50,40 +38,37 @@ const moodCodepoints: Record<number, string> = {
 
 function DashboardSkeleton() {
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex justify-between items-center">
-          <Skeleton className="h-9 w-64" />
-          <Skeleton className="h-8 w-20" />
+    <div className="h-screen flex flex-col bg-background">
+      <div className="p-4 md:p-6 shrink-0">
+        <div className="max-w-5xl mx-auto flex justify-between items-center">
+          <Skeleton className="h-7 w-40" />
+          <Skeleton className="h-9 w-20 rounded-xl" />
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      </div>
+      <div className="px-4 md:px-6 pb-4 shrink-0">
+        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-3">
           {[1, 2, 3, 4, 5].map((i) => (
-            <Card key={i}>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <Skeleton className="h-4 w-28" />
-                <Skeleton className="size-4" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-8 w-12" />
-              </CardContent>
-            </Card>
+            <div key={i} className="rounded-2xl border border-border bg-card p-4">
+              <Skeleton className="h-3 w-16 mb-3" />
+              <Skeleton className="h-7 w-10" />
+            </div>
           ))}
         </div>
-        <Card>
-          <CardHeader><Skeleton className="h-5 w-40" /></CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="flex items-center gap-4">
-                  <Skeleton className="h-10 w-10 rounded-full" />
-                  <Skeleton className="h-4 flex-1" />
-                  <Skeleton className="h-5 w-16" />
-                  <Skeleton className="h-4 w-24" />
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+      </div>
+      <div className="flex-1 min-h-0 px-4 md:px-6 pb-6">
+        <div className="max-w-5xl mx-auto h-full rounded-2xl border border-border bg-card">
+          <div className="p-5"><Skeleton className="h-5 w-36" /></div>
+          <div className="px-5 pb-5 space-y-3">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="flex items-center gap-4">
+                <Skeleton className="h-9 w-9 rounded-full shrink-0" />
+                <Skeleton className="h-4 flex-1" />
+                <Skeleton className="h-5 w-16 rounded-full" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -94,6 +79,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const { token, isAuthenticated, logout } = useAuthStore();
   const navigate = useNavigate();
+  const { theme, toggle } = useTheme();
 
   useEffect(() => {
     if (!isAuthenticated || !token) {
@@ -143,149 +129,133 @@ export default function Dashboard() {
   const negativeReviews = feedbacks.filter((f) => f.sentiment === "Negative").length;
   const urgentCount = feedbacks.filter((f) => f.requires_action).length;
 
+  const stats = [
+    { label: "Total", value: totalReviews },
+    { label: "Positive", value: positiveReviews, color: "text-emerald-500 dark:text-emerald-400" },
+    { label: "Neutral", value: neutralReviews, color: "text-zinc-500 dark:text-zinc-400" },
+    { label: "Negative", value: negativeReviews, color: "text-orange-500 dark:text-orange-400" },
+    { label: "Urgent", value: urgentCount, color: "text-red-500 dark:text-red-400" },
+  ];
+
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-balance">Admin Dashboard</h1>
-          <Button
-            variant="destructive"
-            onClick={handleLogout}
-            className="transition-transform duration-150 ease-out active:scale-[0.96]"
-          >
-            <LogOut className="size-4" />
-            Logout
-          </Button>
+    <div className="h-screen flex flex-col bg-background">
+      <div className="p-4 md:p-6 shrink-0">
+        <div className="max-w-5xl mx-auto flex items-center justify-between">
+          <h1 className="text-xl font-semibold tracking-tight">Dashboard</h1>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggle}
+              className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-white/5 dark:hover:bg-white/5 transition-colors"
+            >
+              {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+            </button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLogout}
+              className="text-muted-foreground hover:text-foreground rounded-xl"
+            >
+              <LogOut className="size-4" />
+              Sign out
+            </Button>
+          </div>
         </div>
+      </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <Card className="transition-shadow duration-150 ease-out hover:shadow-[0_0_0_1px_oklch(1_0_0/0.13)]">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total</CardTitle>
-              <MessageSquare className="size-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold tabular-nums">{totalReviews}</div>
-            </CardContent>
-          </Card>
-          <Card className="transition-shadow duration-150 ease-out hover:shadow-[0_0_0_1px_oklch(1_0_0/0.13)]">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Positive</CardTitle>
-              <ThumbsUp className="size-4 text-green-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold tabular-nums text-green-500">{positiveReviews}</div>
-            </CardContent>
-          </Card>
-          <Card className="transition-shadow duration-150 ease-out hover:shadow-[0_0_0_1px_oklch(1_0_0/0.13)]">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Neutral</CardTitle>
-              <Minus className="size-4 text-yellow-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold tabular-nums text-yellow-500">{neutralReviews}</div>
-            </CardContent>
-          </Card>
-          <Card className="transition-shadow duration-150 ease-out hover:shadow-[0_0_0_1px_oklch(1_0_0/0.13)]">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Negative</CardTitle>
-              <ThumbsDown className="size-4 text-orange-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold tabular-nums text-orange-500">{negativeReviews}</div>
-            </CardContent>
-          </Card>
-          <Card className="transition-shadow duration-150 ease-out hover:shadow-[0_0_0_1px_oklch(1_0_0/0.13)]">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Urgent</CardTitle>
-              <AlertTriangle className="size-4 text-red-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold tabular-nums text-red-500">{urgentCount}</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Feedback</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {feedbacks.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8 text-pretty">
-                No feedback yet. Be the first to submit!
+      <div className="px-4 md:px-6 pb-4 shrink-0">
+        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-3">
+          {stats.map((stat) => (
+            <div key={stat.label} className="rounded-2xl border border-border bg-card p-4">
+              <p className="text-xs font-medium text-muted-foreground mb-1">{stat.label}</p>
+              <p className={`text-2xl font-semibold tabular-nums ${stat.color || ""}`}>
+                {stat.value}
               </p>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-14"></TableHead>
-                      <TableHead>Review</TableHead>
-                      <TableHead>Sentiment</TableHead>
-                      <TableHead>Key Items</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Date</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {feedbacks.map((feedback) => (
-                      <TableRow
-                        key={feedback.id}
-                        className={feedback.requires_action ? "bg-red-500/5" : ""}
-                      >
-                        <TableCell>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex-1 min-h-0 px-4 md:px-6 pb-6">
+        <div className="max-w-5xl mx-auto h-full flex flex-col rounded-2xl border border-border bg-card overflow-hidden">
+          <div className="px-5 py-4 border-b border-border shrink-0">
+            <h2 className="text-sm font-medium">Recent Feedback</h2>
+          </div>
+          {feedbacks.length === 0 ? (
+            <div className="flex-1 flex items-center justify-center">
+              <p className="text-muted-foreground/50 text-sm">No feedback yet.</p>
+            </div>
+          ) : (
+            <div className="flex-1 overflow-auto">
+              <Table>
+                <TableHeader className="sticky top-0 bg-card z-10">
+                  <TableRow className="border-border hover:bg-transparent">
+                    <TableHead className="w-12"></TableHead>
+                    <TableHead className="text-xs font-medium text-muted-foreground">Review</TableHead>
+                    <TableHead className="text-xs font-medium text-muted-foreground">Sentiment</TableHead>
+                    <TableHead className="text-xs font-medium text-muted-foreground">Key Items</TableHead>
+                    <TableHead className="text-xs font-medium text-muted-foreground">Status</TableHead>
+                    <TableHead className="text-xs font-medium text-muted-foreground text-right">Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {feedbacks.map((feedback) => (
+                    <TableRow key={feedback.id} className="border-border">
+                      <TableCell>
+                        <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center overflow-hidden">
                           <NotoEmoji
                             codepoint={moodCodepoints[feedback.rating] || "1f610"}
-                            size={32}
-                            hoverPlay={false}
+                            size={28}
                             static
                           />
-                        </TableCell>
-                        <TableCell className="max-w-xs truncate text-pretty">
-                          {feedback.raw_text}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              feedback.sentiment === "Positive"
-                                ? "default"
-                                : feedback.sentiment === "Negative"
-                                ? "destructive"
-                                : "secondary"
-                            }
-                          >
-                            {feedback.sentiment}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-1">
-                            {feedback.key_items.map((item, i) => (
-                              <Badge key={i} variant="outline">
-                                {item}
-                              </Badge>
-                            ))}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {feedback.requires_action && (
-                            <Badge variant="destructive" className="gap-1">
-                              <AlertTriangle className="size-3" />
-                              Urgent
-                            </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell className="max-w-[240px]">
+                        <p className="text-sm truncate text-pretty">{feedback.raw_text}</p>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="secondary"
+                          className={`rounded-full text-xs font-medium px-2.5 ${
+                            feedback.sentiment === "Positive"
+                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                              : feedback.sentiment === "Negative"
+                              ? "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20"
+                              : "bg-muted text-muted-foreground border-border"
+                          }`}
+                        >
+                          {feedback.sentiment}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {feedback.key_items.slice(0, 3).map((item, i) => (
+                            <span key={i} className="text-xs text-muted-foreground bg-muted rounded-md px-1.5 py-0.5">
+                              {item}
+                            </span>
+                          ))}
+                          {feedback.key_items.length > 3 && (
+                            <span className="text-xs text-muted-foreground/50">+{feedback.key_items.length - 3}</span>
                           )}
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground text-right tabular-nums whitespace-nowrap">
-                          {new Date(feedback.created_at).toLocaleDateString()}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {feedback.requires_action && (
+                          <span className="inline-flex items-center gap-1 text-xs text-red-600 dark:text-red-400 bg-red-500/10 rounded-full px-2 py-0.5">
+                            <AlertTriangle className="size-3" />
+                            Urgent
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground text-right tabular-nums whitespace-nowrap">
+                        {new Date(feedback.created_at).toLocaleDateString()}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -27,6 +27,7 @@ A secure, full-stack web application that allows customers to submit restaurant 
 |-------|------------|
 | **Frontend** | React 19 + TypeScript + Vite |
 | **UI Components** | shadcn/ui + Tailwind CSS v4 |
+| **Animations** | Framer Motion + Lottie (Noto Emoji) |
 | **State Management** | Zustand |
 | **Routing** | React Router v7 |
 | **Backend** | Node.js + Express 5 + TypeScript |
@@ -40,10 +41,14 @@ A secure, full-stack web application that allows customers to submit restaurant 
 
 ## Features
 
-- **Public Feedback Form** — Anyone can submit a restaurant review
+- **Animated Mood Selection** — 5 Google Noto animated emoji faces for experience rating
+- **Public Feedback Form** — Anyone can submit a restaurant review with mood + text
 - **LLM-Powered Analysis** — Each review is analyzed for sentiment, key topics, and urgency
 - **Admin Authentication** — JWT-based role-based access control
 - **Real-Time Dashboard** — Admin sees new feedback instantly via WebSocket
+- **5 KPI Cards** — Total, Positive, Neutral, Negative, Urgent counts
+- **Mood Column** — Dashboard table shows the animated emoji for each review's mood rating
+- **Dark/Light Mode** — Toggle between themes, persisted to localStorage
 - **Urgent Action Flagging** — Reviews mentioning food poisoning or severe complaints are highlighted
 - **Sentiment Badges** — Visual indicators for Positive/Neutral/Negative reviews
 - **Responsive Design** — Works on desktop and mobile
@@ -57,7 +62,10 @@ llm-feedback-system/
 ├── apps/
 │   ├── client/                        # React frontend
 │   │   ├── src/
-│   │   │   ├── components/ui/         # Shadcn UI components
+│   │   │   ├── components/
+│   │   │   │   ├── ui/                # Shadcn UI components
+│   │   │   │   ├── noto-emoji.tsx     # Noto animated emoji (Lottie)
+│   │   │   │   └── theme-provider.tsx # Dark/light mode context
 │   │   │   ├── pages/
 │   │   │   │   ├── Home.tsx           # Public feedback form
 │   │   │   │   ├── Login.tsx          # Admin login
@@ -78,7 +86,7 @@ llm-feedback-system/
 │   └── server/                        # Express backend
 │       ├── src/
 │       │   ├── config/
-│       │   │   ├── db.ts              # PostgreSQL connection pool
+│       │   │   ├── db.ts              # Neon serverless driver
 │       │   │   └── seed.ts            # DB init + admin seed
 │       │   ├── middleware/
 │       │   │   └── auth.ts            # JWT verification
@@ -268,7 +276,8 @@ Submit a restaurant review. This is a **public** endpoint (no auth required).
 **Request:**
 ```json
 {
-  "text": "The pizza was amazing but the service was slow and cold."
+  "text": "The pizza was amazing but the service was slow and cold.",
+  "rating": 4
 }
 ```
 
@@ -278,6 +287,7 @@ Submit a restaurant review. This is a **public** endpoint (no auth required).
   "id": 1,
   "raw_text": "The pizza was amazing but the service was slow and cold.",
   "sentiment": "Neutral",
+  "rating": 4,
   "key_items": ["Pizza", "Service"],
   "requires_action": false,
   "created_at": "2026-07-27T10:30:00.000Z"
@@ -302,6 +312,7 @@ Authorization: Bearer <token>
     "id": 1,
     "raw_text": "The pizza was amazing...",
     "sentiment": "Positive",
+    "rating": 5,
     "key_items": ["Pizza"],
     "requires_action": false,
     "created_at": "2026-07-27T10:30:00.000Z"
@@ -357,6 +368,7 @@ CREATE TABLE feedback (
   id SERIAL PRIMARY KEY,
   raw_text TEXT NOT NULL,
   sentiment VARCHAR(20) NOT NULL,
+  rating INTEGER DEFAULT 3,
   key_items JSONB NOT NULL DEFAULT '[]',
   requires_action BOOLEAN DEFAULT false,
   created_at TIMESTAMP DEFAULT NOW()
@@ -402,14 +414,14 @@ CREATE TABLE feedback (
 ### Flow
 
 1. **Customer visits** the feedback form at `/`
-2. **Customer writes** a review and clicks Submit
-3. **Server receives** the text at `POST /api/feedback`
+2. **Customer selects** a mood emoji (Terrible/Poor/Okay/Good/Excellent) and writes a review
+3. **Server receives** the text + rating at `POST /api/feedback`
 4. **Server calls Groq LLM** with the review text
 5. **LLM returns** structured JSON: sentiment, key items, urgency flag
-6. **Server stores** everything in PostgreSQL
+6. **Server stores** everything in PostgreSQL (including mood rating)
 7. **Server broadcasts** the new feedback via Socket.io
 8. **Admin dashboard** receives the broadcast and prepends the new entry
-9. **Urgent reviews** are highlighted in red for immediate attention
+9. **Mood emoji** and sentiment badge shown for each review
 
 ---
 

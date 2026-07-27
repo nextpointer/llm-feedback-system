@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useRef, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import lottie from "lottie-web";
 
@@ -8,10 +8,9 @@ interface NotoEmojiProps {
   codepoint: string;
   size?: number;
   isSelected?: boolean;
+  hasSelection?: boolean;
   onClick?: () => void;
   label?: string;
-  color?: string;
-  hoverPlay?: boolean;
   static?: boolean;
 }
 
@@ -19,10 +18,9 @@ export function NotoEmoji({
   codepoint,
   size = 48,
   isSelected,
+  hasSelection,
   onClick,
   label,
-  color,
-  hoverPlay = true,
   static: isStatic = false,
 }: NotoEmojiProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -33,7 +31,6 @@ export function NotoEmoji({
     goToAndStop: (v: number, b: boolean) => void;
     loop: boolean | number;
   } | null>(null);
-  const [isHovered, setIsHovered] = useState(false);
   const [animData, setAnimData] = useState<object | null>(null);
 
   useEffect(() => {
@@ -85,36 +82,26 @@ export function NotoEmoji({
     const anim = animRef.current;
     if (!anim || isStatic) return;
 
-    if (isHovered && hoverPlay) {
-      anim.loop = true;
-      anim.play();
-    } else {
-      anim.loop = false;
-      anim.stop();
-      anim.goToAndStop(0, true);
-    }
-  }, [isHovered, hoverPlay, isStatic]);
-
-  const handleHoverStart = useCallback(() => setIsHovered(true), []);
-  const handleHoverEnd = useCallback(() => setIsHovered(false), []);
+    anim.loop = true;
+    anim.play();
+  }, [animData, isStatic]);
 
   return (
     <motion.button
       type="button"
       onClick={onClick}
-      onHoverStart={handleHoverStart}
-      onHoverEnd={handleHoverEnd}
-      whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
-      className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl border cursor-pointer select-none transition-colors duration-100 ${
-        isSelected
-          ? `${color || "bg-primary/10 border-primary/20"} ring-2 ring-primary/20`
-          : "border-border hover:bg-muted/50"
-      }`}
+      animate={isSelected ? { scale: 1.15, opacity: 1 } : { scale: 1, opacity: hasSelection ? 0.4 : 1 }}
+      transition={{ type: "spring", stiffness: 400, damping: 20 }}
+      className="flex flex-col items-center gap-1.5 cursor-pointer select-none outline-none rounded-xl px-1"
     >
       <div ref={containerRef} style={{ width: size, height: size }} />
       {label && (
-        <span className="text-xs font-medium text-muted-foreground">{label}</span>
+        <span className={`text-[10px] font-medium transition-colors duration-200 ${
+          isSelected ? "text-foreground" : "text-muted-foreground/40"
+        }`}>
+          {label}
+        </span>
       )}
     </motion.button>
   );

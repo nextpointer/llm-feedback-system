@@ -5,15 +5,9 @@ import { apiRequest } from "../lib/api";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
 import { Alert, AlertDescription } from "../components/ui/alert";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft, Sun, Moon } from "lucide-react";
+import { useTheme } from "../components/theme-provider";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -22,6 +16,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
+  const { theme, toggle } = useTheme();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,22 +45,24 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md transition-shadow duration-150 ease-out hover:shadow-[0_0_0_1px_oklch(1_0_0/0.13)]">
-        <CardHeader className="text-center space-y-1">
-          <CardTitle className="text-2xl font-bold text-balance">Admin Login</CardTitle>
-          <CardDescription className="text-pretty">
-            Sign in to access the feedback dashboard
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="w-full max-w-sm">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold tracking-tight">Welcome back</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Sign in to the admin dashboard
+          </p>
+        </div>
+
+        <div className="rounded-3xl border border-border bg-card p-8">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <Alert variant="destructive">
+              <Alert variant="destructive" className="rounded-xl">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
+
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-sm font-medium">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -73,10 +70,12 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="rounded-xl"
               />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-sm font-medium">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -84,47 +83,54 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className="rounded-xl"
               />
             </div>
+
             <Button
               type="submit"
-              className="w-full transition-transform duration-150 ease-out active:scale-[0.96]"
+              className="w-full h-11 rounded-xl font-medium transition-all duration-200 active:scale-[0.97]"
               disabled={loading}
             >
               {loading ? (
                 <>
-                  <Loader2 className="animate-spin" />
+                  <Loader2 className="size-4 animate-spin" />
                   Signing in...
                 </>
               ) : (
                 "Sign In"
               )}
             </Button>
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="transition-transform duration-150 ease-out active:scale-[0.96]"
-                onClick={() => navigate("/")}
-                disabled={loading}
-              >
-                <ArrowLeft className="size-4" />
-                Back
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1 transition-transform duration-150 ease-out active:scale-[0.96]"
-                onClick={fillDemo}
-                disabled={loading}
-              >
-                Fill Demo Credentials
-              </Button>
-            </div>
           </form>
-        </CardContent>
-      </Card>
+
+          <div className="mt-5 pt-5 border-t border-border space-y-3">
+            <button
+              type="button"
+              onClick={fillDemo}
+              className="w-full text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors duration-200"
+            >
+              Use demo credentials
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-6 text-center">
+          <button
+            onClick={() => navigate("/")}
+            className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors duration-200 inline-flex items-center gap-1"
+          >
+            <ArrowLeft className="size-3" />
+            Back to home
+          </button>
+        </div>
+      </div>
+
+      <button
+        onClick={toggle}
+        className="fixed bottom-6 right-6 p-2 text-muted-foreground hover:text-foreground transition-colors z-50"
+      >
+        {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+      </button>
     </div>
   );
 }
