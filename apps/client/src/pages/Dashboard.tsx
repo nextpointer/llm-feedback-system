@@ -23,18 +23,30 @@ import {
 import {
   MessageSquare,
   ThumbsUp,
+  ThumbsDown,
+  Minus,
   AlertTriangle,
   LogOut,
 } from "lucide-react";
+import { NotoEmoji } from "../components/noto-emoji";
 
 interface Feedback {
   id: number;
   raw_text: string;
   sentiment: string;
+  rating: number;
   key_items: string[];
   requires_action: boolean;
   created_at: string;
 }
+
+const moodCodepoints: Record<number, string> = {
+  1: "1f621",
+  2: "1f622",
+  3: "1f610",
+  4: "1f60a",
+  5: "1f929",
+};
 
 function DashboardSkeleton() {
   return (
@@ -44,9 +56,8 @@ function DashboardSkeleton() {
           <Skeleton className="h-9 w-64" />
           <Skeleton className="h-8 w-20" />
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[1, 2, 3].map((i) => (
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          {[1, 2, 3, 4, 5].map((i) => (
             <Card key={i}>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <Skeleton className="h-4 w-28" />
@@ -58,19 +69,16 @@ function DashboardSkeleton() {
             </Card>
           ))}
         </div>
-
         <Card>
-          <CardHeader>
-            <Skeleton className="h-5 w-40" />
-          </CardHeader>
+          <CardHeader><Skeleton className="h-5 w-40" /></CardHeader>
           <CardContent>
             <div className="space-y-3">
               {[1, 2, 3, 4, 5].map((i) => (
                 <div key={i} className="flex items-center gap-4">
+                  <Skeleton className="h-10 w-10 rounded-full" />
                   <Skeleton className="h-4 flex-1" />
                   <Skeleton className="h-5 w-16" />
                   <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-4 w-20" />
                 </div>
               ))}
             </div>
@@ -131,6 +139,8 @@ export default function Dashboard() {
 
   const totalReviews = feedbacks.length;
   const positiveReviews = feedbacks.filter((f) => f.sentiment === "Positive").length;
+  const neutralReviews = feedbacks.filter((f) => f.sentiment === "Neutral").length;
+  const negativeReviews = feedbacks.filter((f) => f.sentiment === "Negative").length;
   const urgentCount = feedbacks.filter((f) => f.requires_action).length;
 
   return (
@@ -148,12 +158,10 @@ export default function Dashboard() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <Card className="transition-shadow duration-150 ease-out hover:shadow-[0_0_0_1px_oklch(1_0_0/0.13)]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Reviews
-              </CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total</CardTitle>
               <MessageSquare className="size-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -162,28 +170,38 @@ export default function Dashboard() {
           </Card>
           <Card className="transition-shadow duration-150 ease-out hover:shadow-[0_0_0_1px_oklch(1_0_0/0.13)]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Positive Reviews
-              </CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Positive</CardTitle>
               <ThumbsUp className="size-4 text-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold tabular-nums text-green-500">
-                {positiveReviews}
-              </div>
+              <div className="text-3xl font-bold tabular-nums text-green-500">{positiveReviews}</div>
             </CardContent>
           </Card>
           <Card className="transition-shadow duration-150 ease-out hover:shadow-[0_0_0_1px_oklch(1_0_0/0.13)]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Urgent Action
-              </CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Neutral</CardTitle>
+              <Minus className="size-4 text-yellow-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold tabular-nums text-yellow-500">{neutralReviews}</div>
+            </CardContent>
+          </Card>
+          <Card className="transition-shadow duration-150 ease-out hover:shadow-[0_0_0_1px_oklch(1_0_0/0.13)]">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Negative</CardTitle>
+              <ThumbsDown className="size-4 text-orange-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold tabular-nums text-orange-500">{negativeReviews}</div>
+            </CardContent>
+          </Card>
+          <Card className="transition-shadow duration-150 ease-out hover:shadow-[0_0_0_1px_oklch(1_0_0/0.13)]">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Urgent</CardTitle>
               <AlertTriangle className="size-4 text-red-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold tabular-nums text-red-500">
-                {urgentCount}
-              </div>
+              <div className="text-3xl font-bold tabular-nums text-red-500">{urgentCount}</div>
             </CardContent>
           </Card>
         </div>
@@ -202,6 +220,7 @@ export default function Dashboard() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-14"></TableHead>
                       <TableHead>Review</TableHead>
                       <TableHead>Sentiment</TableHead>
                       <TableHead>Key Items</TableHead>
@@ -213,10 +232,16 @@ export default function Dashboard() {
                     {feedbacks.map((feedback) => (
                       <TableRow
                         key={feedback.id}
-                        className={
-                          feedback.requires_action ? "bg-red-500/5" : ""
-                        }
+                        className={feedback.requires_action ? "bg-red-500/5" : ""}
                       >
+                        <TableCell>
+                          <NotoEmoji
+                            codepoint={moodCodepoints[feedback.rating] || "1f610"}
+                            size={32}
+                            hoverPlay={false}
+                            static
+                          />
+                        </TableCell>
                         <TableCell className="max-w-xs truncate text-pretty">
                           {feedback.raw_text}
                         </TableCell>
@@ -250,7 +275,7 @@ export default function Dashboard() {
                             </Badge>
                           )}
                         </TableCell>
-                        <TableCell className="text-sm text-muted-foreground text-right tabular-nums">
+                        <TableCell className="text-sm text-muted-foreground text-right tabular-nums whitespace-nowrap">
                           {new Date(feedback.created_at).toLocaleDateString()}
                         </TableCell>
                       </TableRow>

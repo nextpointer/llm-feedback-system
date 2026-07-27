@@ -47,17 +47,18 @@ export function setSocketIO(socketIO: Server) {
  */
 router.post("/", async (req, res) => {
   try {
-    const { text } = req.body;
+    const { text, rating } = req.body;
 
     if (!text || typeof text !== "string" || text.trim().length === 0) {
       return res.status(400).json({ error: "Feedback text is required" });
     }
 
+    const moodRating = typeof rating === "number" ? rating : 3;
     const analysis = await analyzeFeedback(text.trim());
 
     const result = await sql`
-      INSERT INTO feedback (raw_text, sentiment, key_items, requires_action)
-      VALUES (${text.trim()}, ${analysis.sentiment}, ${JSON.stringify(analysis.key_items)}, ${analysis.requires_action})
+      INSERT INTO feedback (raw_text, sentiment, rating, key_items, requires_action)
+      VALUES (${text.trim()}, ${analysis.sentiment}, ${moodRating}, ${JSON.stringify(analysis.key_items)}, ${analysis.requires_action})
       RETURNING *
     `;
 

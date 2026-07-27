@@ -20,11 +20,14 @@ export async function initializeDatabase() {
       id SERIAL PRIMARY KEY,
       raw_text TEXT NOT NULL,
       sentiment VARCHAR(20) NOT NULL,
+      rating INTEGER DEFAULT 3,
       key_items JSONB NOT NULL DEFAULT '[]',
       requires_action BOOLEAN DEFAULT false,
       created_at TIMESTAMP DEFAULT NOW()
     )
   `;
+
+  await sql`ALTER TABLE feedback ADD COLUMN IF NOT EXISTS rating INTEGER DEFAULT 3`;
 
   const adminEmail = process.env.ADMIN_EMAIL || "admin@restaurant.com";
   const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
