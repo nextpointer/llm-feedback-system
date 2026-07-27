@@ -17,7 +17,7 @@ A secure, full-stack web application that allows customers to submit restaurant 
 - [WebSocket Events](#websocket-events)
 - [Database Schema](#database-schema)
 - [How It Works](#how-it-works)
-- [Screenshots](#screenshots)
+- [Deployment](#deployment)
 
 ---
 
@@ -410,6 +410,61 @@ CREATE TABLE feedback (
 7. **Server broadcasts** the new feedback via Socket.io
 8. **Admin dashboard** receives the broadcast and prepends the new entry
 9. **Urgent reviews** are highlighted in red for immediate attention
+
+---
+
+## Deployment
+
+### Recommended: Vercel (Frontend) + Render (Backend)
+
+Both offer free tiers sufficient for this project.
+
+### Deploy Backend to Render
+
+1. Push your code to GitHub
+2. Go to [render.com](https://render.com) and create a new **Web Service**
+3. Connect your GitHub repo
+4. Configure:
+   - **Name**: `llm-feedback-api`
+   - **Runtime**: Node
+   - **Build Command**: `bun install && cd apps/server && bun install`
+   - **Start Command**: `cd apps/server && bun run start`
+   - **Plan**: Free
+5. Add environment variables:
+   - `DATABASE_URL` — your Neon connection string
+   - `GROQ_API_KEY` — your Groq API key
+   - `JWT_SECRET` — a secure random string
+   - `CLIENT_URL` — your Vercel frontend URL (e.g., `https://your-app.vercel.app`)
+6. Deploy — your API will be live at `https://llm-feedback-api.onrender.com`
+
+### Deploy Frontend to Vercel
+
+1. Go to [vercel.com](https://vercel.com) and import your GitHub repo
+2. Configure:
+   - **Framework**: Vite
+   - **Root Directory**: `apps/client`
+   - **Build Command**: `bun run build`
+   - **Output Directory**: `dist`
+3. Add environment variables:
+   - `VITE_API_URL` — your Render backend URL (e.g., `https://llm-feedback-api.onrender.com`)
+   - `VITE_WS_URL` — same as above
+4. Deploy — your frontend will be live at `https://your-app.vercel.app`
+
+### After Deployment
+
+1. Open your backend URL `/docs` to see the Swagger API docs
+2. Open your frontend URL to submit feedback
+3. Login at `/login` with admin credentials
+4. Open `/dashboard` to see the real-time admin view
+
+### Other Free Options
+
+| Service | Type | Free Tier |
+|---------|------|-----------|
+| **Railway** | Backend | $5 credit/month |
+| **Fly.io** | Backend | 3 shared VMs |
+| **Netlify** | Frontend | 100GB bandwidth |
+| **Cloudflare Pages** | Frontend | Unlimited |
 
 ---
 

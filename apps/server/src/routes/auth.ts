@@ -5,6 +5,41 @@ import sql from "../config/db.js";
 
 const router = Router();
 
+/**
+ * @openapi
+ * /api/login:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Admin login
+ *     description: Authenticate admin user and receive a JWT token.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/LoginRequest'
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/LoginResponse'
+ *       400:
+ *         description: Missing fields
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Invalid credentials
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ */
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;

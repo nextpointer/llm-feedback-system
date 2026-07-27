@@ -3,6 +3,8 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 import dotenv from "dotenv";
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./src/config/swagger.js";
 import { initializeDatabase } from "./src/config/seed.js";
 import authRoutes from "./src/routes/auth.js";
 import feedbackRoutes, { setSocketIO } from "./src/routes/feedback.js";
@@ -21,10 +23,25 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 
+// Swagger API docs
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: ".swagger-ui .topbar { display: none }",
+  customSiteTitle: "Feedback System API Docs",
+}));
+app.get("/docs.json", (_req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
+});
+
 setSocketIO(io);
 
 app.use("/api", authRoutes);
 app.use("/api/feedback", feedbackRoutes);
+
+// Health check
+app.get("/health", (_req, res) => {
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
 
 io.on("connection", (socket) => {
   console.log("Client connected:", socket.id);
@@ -41,6 +58,7 @@ async function start() {
     await initializeDatabase();
     server.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
+      console.log(`API docs at http://localhost:${PORT}/docs`);
     });
   } catch (error) {
     console.error("Failed to start server:", error);

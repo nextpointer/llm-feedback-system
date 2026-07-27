@@ -12,6 +12,39 @@ export function setSocketIO(socketIO: Server) {
   io = socketIO;
 }
 
+/**
+ * @openapi
+ * /api/feedback:
+ *   post:
+ *     tags: [Feedback]
+ *     summary: Submit a restaurant review
+ *     description: Public endpoint. Accepts a review, processes it with LLM, stores result, and broadcasts via WebSocket.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/FeedbackRequest'
+ *     responses:
+ *       201:
+ *         description: Feedback processed and saved
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/FeedbackResponse'
+ *       400:
+ *         description: Missing or empty text
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Failed to process feedback
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 router.post("/", async (req, res) => {
   try {
     const { text } = req.body;
@@ -41,6 +74,43 @@ router.post("/", async (req, res) => {
   }
 });
 
+/**
+ * @openapi
+ * /api/feedback/insights:
+ *   get:
+ *     tags: [Feedback]
+ *     summary: Get all feedback (Admin only)
+ *     description: Protected endpoint. Requires valid admin JWT in Authorization header.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all feedback entries
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/FeedbackResponse'
+ *       401:
+ *         description: Unauthorized - no token or invalid token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       403:
+ *         description: Forbidden - not an admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Failed to fetch insights
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 router.get("/insights", authenticateAdmin, async (_req, res) => {
   try {
     const result = await sql`SELECT * FROM feedback ORDER BY created_at DESC`;
