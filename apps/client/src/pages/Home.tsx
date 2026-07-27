@@ -12,6 +12,7 @@ import {
 } from "../components/ui/card";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Badge } from "../components/ui/badge";
+import { Loader2 } from "lucide-react";
 
 interface FeedbackResult {
   id: number;
@@ -112,7 +113,14 @@ export default function Home() {
                 />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Analyzing..." : "Submit Review"}
+                {loading ? (
+                  <>
+                    <Loader2 className="animate-spin" />
+                    Analyzing...
+                  </>
+                ) : (
+                  "Submit Review"
+                )}
               </Button>
             </form>
           </CardContent>

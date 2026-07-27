@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import { Alert, AlertDescription } from "../components/ui/alert";
+import { Loader2 } from "lucide-react";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -40,6 +41,11 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fillDemo = () => {
+    setEmail("admin@restaurant.com");
+    setPassword("admin123");
   };
 
   return (
@@ -81,7 +87,23 @@ export default function Login() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? (
+                <>
+                  <Loader2 className="animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                "Sign In"
+              )}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={fillDemo}
+              disabled={loading}
+            >
+              Fill Demo Credentials
             </Button>
           </form>
         </CardContent>
