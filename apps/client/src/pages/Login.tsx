@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import { Alert, AlertDescription } from "../components/ui/alert";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -100,15 +100,28 @@ export default function Login() {
                 "Sign In"
               )}
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full transition-transform duration-150 ease-out active:scale-[0.96]"
-              onClick={fillDemo}
-              disabled={loading}
-            >
-              Fill Demo Credentials
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="transition-transform duration-150 ease-out active:scale-[0.96]"
+                onClick={() => navigate("/")}
+                disabled={loading}
+              >
+                <ArrowLeft className="size-4" />
+                Back
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1 transition-transform duration-150 ease-out active:scale-[0.96]"
+                onClick={fillDemo}
+                disabled={loading}
+              >
+                Fill Demo Credentials
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>
