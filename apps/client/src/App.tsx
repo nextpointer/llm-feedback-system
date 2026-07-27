@@ -1,16 +1,20 @@
-import { Button } from "./components/ui/button"
-
-
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Toaster } from "sonner";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
-
-
   return (
-    <>
-      <h1> hello therwe</h1>
-      <Button variant="outline"> done</Button>
-    </>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Routes>
+      <Toaster position="top-right" richColors />
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
